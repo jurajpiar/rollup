@@ -1,0 +1,9 @@
+[submodule "op-geth"]
+  path = op-geth
+  url = git@github.com:jurajpiar/op-geth.git
+  branch = rsk/poc_01
+
+[submodule "optimism"]
+	path = optimism
+	url = git@github.com:jurajpiar/optimism.git
+  branch = rsk/poc_01_using_op-deployer

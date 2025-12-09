@@ -1,0 +1,13 @@
+
+# Ignore everytihng
+*
+
+# Except for whitelist
+!go.work
+!run_setup.sh
+!.gitignore
+!.gitmodules
+!/op-geth
+!/optimism
+
+
