@@ -3,7 +3,11 @@
 *
 
 # Except for whitelist
+!/cmd
+!/cmd/**
+!go.mod
 !go.work
+!go.work.sum
 !run_setup.sh
 !.gitignore
 !.gitmodules
