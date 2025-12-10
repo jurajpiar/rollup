@@ -127,7 +127,7 @@ echo "EOA_ADDRESS: ${EOA_ADDRESS}" >> "${MASTER_LOG}"
 echo "" >> "${MASTER_LOG}"
 
 # Progress tracking
-TOTAL_STEPS=13  # Increased to include build steps
+TOTAL_STEPS=11  # Increased to include build steps
 CURRENT_STEP=0
 SCRIPT_START_TIME=$(date +%s)
 
@@ -595,18 +595,18 @@ run_command \
     --outfile "${WORKDIR}/l2-semvers.json" \
     "${L2_CHAIN_ID}"
 
-# Step 11.5: Build op-geth
-build_op_geth
+# # Step 11.5: Build op-geth
+# build_op_geth
 
-# Step 12: Initialise OP-Geth with genesis file
-run_command \
-    "Initialise OP-Geth with genesis file" \
-    "${WORKDIR}/logs/11_init_op_geth.log" \
-    "${WORKSPACE_FOLDER}/op-geth/build/bin/geth" \
-    init \
-    --datadir="${WORKDIR}/op-geth-data" \
-    --state.scheme=hash \
-    "${WORKDIR}/genesis.json"
+# # Step 12: Initialise OP-Geth with genesis file
+# run_command \
+#     "Initialise OP-Geth with genesis file" \
+#     "${WORKDIR}/logs/11_init_op_geth.log" \
+#     "${WORKSPACE_FOLDER}/op-geth/build/bin/geth" \
+#     init \
+#     --datadir="${WORKDIR}/op-geth-data" \
+#     --state.scheme=hash \
+#     "${WORKDIR}/genesis.json"
 
 # Calculate total time
 SCRIPT_END_TIME=$(date +%s)

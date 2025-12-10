@@ -8,9 +8,14 @@
 !go.mod
 !go.work
 !run_setup.sh
-!.gitignore
+!
+.gitignore
 !.gitmodules
 !/op-geth
 !/optimism
 
+!README.md
 
+
+# Additionally ignore debug binaries
+__debug_*

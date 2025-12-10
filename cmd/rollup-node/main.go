@@ -15,7 +15,9 @@ import (
 
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/eth/catalyst"
 	"github.com/ethereum/go-ethereum/eth/ethconfig"
@@ -23,6 +25,7 @@ import (
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/urfave/cli/v2"
 
 	"github.com/ethereum-optimism/optimism/op-node/config"
@@ -180,8 +183,14 @@ func runRollupNode(ctx *cli.Context) error {
 		return fmt.Errorf("failed to load genesis: %w", err)
 	}
 
+	// Initialize op-geth if needed
+	logStep("STEP 1/4: Initializing op-geth datadir if needed...")
+	if err := initializeOpGeth(ctx, genesis); err != nil {
+		return fmt.Errorf("failed to initialize op-geth: %w", err)
+	}
+
 	// Start op-geth
-	logStep("STEP 1/3: Starting op-geth execution layer...")
+	logStep("STEP 2/4: Starting op-geth execution layer...")
 	gethNode, err := startOpGeth(mainCtx, ctx, genesis)
 	if err != nil {
 		return fmt.Errorf("failed to start op-geth: %w", err)
@@ -194,7 +203,7 @@ func runRollupNode(ctx *cli.Context) error {
 	}()
 
 	// Wait for op-geth to be ready
-	logStep("STEP 2/3: Waiting for op-geth to be ready...")
+	logStep("STEP 3/4: Waiting for op-geth to be ready...")
 	if err := waitForGethReady(mainCtx, ctx); err != nil {
 		return fmt.Errorf("op-geth failed to become ready: %w", err)
 	}
@@ -203,7 +212,7 @@ func runRollupNode(ctx *cli.Context) error {
 	engineEndpoint := fmt.Sprintf("http://%s:%d", ctx.String("l2-auth-addr"), ctx.Int("l2-auth-port"))
 
 	// Start op-node
-	logStep("STEP 3/3: Starting op-node consensus layer...")
+	logStep("STEP 4/4: Starting op-node consensus layer...")
 	opNode, err := startOpNode(mainCtx, ctx, engineEndpoint, jwtPath)
 	if err != nil {
 		return fmt.Errorf("failed to start op-node: %w", err)
@@ -300,6 +309,58 @@ func loadGenesis(genesisPath string) (*core.Genesis, error) {
 	}
 
 	return &genesis, nil
+}
+
+func initializeOpGeth(cliCtx *cli.Context, genesis *core.Genesis) error {
+	datadir := cliCtx.String("datadir")
+
+	// Create minimal node config just to access database opening functionality
+	nodeCfg := &node.Config{
+		DataDir: datadir,
+	}
+
+	// Create node stack to access database
+	stack, err := node.New(nodeCfg)
+	if err != nil {
+		return fmt.Errorf("failed to create node for initialization: %w", err)
+	}
+	defer stack.Close()
+
+	// Open the chain database
+	chaindb, err := stack.OpenDatabaseWithOptions("chaindata", node.DatabaseOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to open chain database: %w", err)
+	}
+	defer chaindb.Close()
+
+	// Check if genesis block already exists
+	genesisHash := rawdb.ReadCanonicalHash(chaindb, 0)
+	if genesisHash != (common.Hash{}) {
+		log.Info("op-geth datadir already initialized", "genesis_hash", genesisHash)
+		return nil
+	}
+
+	log.Info("Initializing op-geth datadir with genesis block...")
+
+	// Create trie database for initialization
+	triedb := triedb.NewDatabase(chaindb, &triedb.Config{
+		Preimages: false,
+		IsVerkle:  genesis.IsVerkle(),
+	})
+	defer triedb.Close()
+
+	// Initialize genesis block
+	var overrides core.ChainOverrides
+	_, hash, compatErr, err := core.SetupGenesisBlockWithOverride(chaindb, triedb, genesis, &overrides)
+	if err != nil {
+		return fmt.Errorf("failed to write genesis block: %w", err)
+	}
+	if compatErr != nil {
+		return fmt.Errorf("failed to write chain config: %w", compatErr)
+	}
+
+	log.Info("Successfully initialized op-geth datadir", "genesis_hash", hash)
+	return nil
 }
 
 func startOpGeth(ctx context.Context, cliCtx *cli.Context, genesis *core.Genesis) (*node.Node, error) {
