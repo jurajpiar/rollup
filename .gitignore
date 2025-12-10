@@ -3,6 +3,9 @@
 *
 
 # Except for whitelist
+!/cmd
+!/cmd/**
+!go.mod
 !go.work
 !run_setup.sh
 !.gitignore
