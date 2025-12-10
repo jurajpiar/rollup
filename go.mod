@@ -3,8 +3,8 @@ module github.com/jurajpiar/rollup
 go 1.23.0
 
 require (
-	github.com/ethereum-optimism/optimism v0.0.0
-	github.com/ethereum/go-ethereum v1.16.3
+    github.com/jurajpiar/optimism v0.0.0
+	github.com/jurajpiar/op-geth v0.0.0
 	github.com/urfave/cli/v2 v2.27.6
 )
 
@@ -204,6 +204,5 @@ require (
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
 
-replace github.com/ethereum/go-ethereum => ./op-geth
-
-replace github.com/ethereum-optimism/optimism => ./optimism
+replace github.com/jurajpiar/optimism => ./optimism
+replace github.com/jurajpiar/op-geth => ./op-geth

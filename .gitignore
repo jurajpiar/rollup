@@ -8,9 +8,10 @@
 !go.mod
 !go.work
 !run_setup.sh
-!.gitignore
+!
+.gitignore
 !.gitmodules
 !/op-geth
 !/optimism
 
-
+!README.md

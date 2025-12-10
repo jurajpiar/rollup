@@ -6,4 +6,4 @@
 [submodule "optimism"]
 	path = optimism
 	url = git@github.com:jurajpiar/optimism.git
-  branch = rsk/poc_01_using_op-deployer
+  branch = rsk/poc_01
