@@ -1,9 +1,9 @@
 [submodule "op-geth"]
   path = op-geth
   url = git@github.com:jurajpiar/op-geth.git
-  branch = rsk/poc_01
+  branch = rsk/poc_02
 
 [submodule "optimism"]
 	path = optimism
 	url = git@github.com:jurajpiar/optimism.git
-  branch = rsk/poc_01
+  branch = rsk/poc_02
