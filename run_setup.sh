@@ -338,13 +338,9 @@ with open('${intent_file}', 'r') as f:
     content = f.read()
 
 # Replace zero addresses (0x0000000000000000000000000000000000000000) with EOA_ADDRESS
-# But NOT in the chain ID field (id = "...")
 zero_address = '0x0000000000000000000000000000000000000000'
 eoa_address = '${EOA_ADDRESS}'
 
-# Only replace zero addresses that are NOT in the chain ID field
-# Match zero addresses that appear after = signs (address fields)
-# but not when preceded by "id ="
 lines = content.split('\n')
 result_lines = []
 for line in lines:
@@ -356,21 +352,21 @@ for line in lines:
         result_lines.append(line.replace(zero_address, eoa_address))
 content = '\n'.join(result_lines)
 
-# Check if eip1559 values exist
-has_eip1559 = 'eip1559DenominatorCanyon' in content
+# # Check if eip1559 values exist
+# has_eip1559 = 'eip1559DenominatorCanyon' in content
 
-if not has_eip1559:
-    # Add the values after sequencerFeeVaultRecipient line
-    content = re.sub(
-        r'(sequencerFeeVaultRecipient[^\n]+\n)',
-        r'\1  eip1559DenominatorCanyon = 250\n  eip1559Denominator = 50\n  eip1559Elasticity = 6\n',
-        content
-    )
-else:
-    # Update existing values
-    content = re.sub(r'^(\s*eip1559DenominatorCanyon\s*=\s*).*$', r'\1 250', content, flags=re.MULTILINE)
-    content = re.sub(r'^(\s*eip1559Denominator\s*=\s*).*$', r'\1 50', content, flags=re.MULTILINE)
-    content = re.sub(r'^(\s*eip1559Elasticity\s*=\s*).*$', r'\1 6', content, flags=re.MULTILINE)
+# if not has_eip1559:
+#     # Add the values after sequencerFeeVaultRecipient line
+#     content = re.sub(
+#         r'(sequencerFeeVaultRecipient[^\n]+\n)',
+#         r'\1  eip1559DenominatorCanyon = 250\n  eip1559Denominator = 50\n  eip1559Elasticity = 6\n',
+#         content
+#     )
+# else:
+#     # Update existing values
+#     content = re.sub(r'^(\s*eip1559DenominatorCanyon\s*=\s*).*$', r'\1 250', content, flags=re.MULTILINE)
+#     content = re.sub(r'^(\s*eip1559Denominator\s*=\s*).*$', r'\1 50', content, flags=re.MULTILINE)
+#     content = re.sub(r'^(\s*eip1559Elasticity\s*=\s*).*$', r'\1 6', content, flags=re.MULTILINE)
 
 with open('${intent_file}', 'w') as f:
     f.write(content)
